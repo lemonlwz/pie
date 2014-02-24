@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>pie demo</title>
+  <style type="text/css">
+    body { background: #333;}
+  </style>
+  <script src="pie.js" type="text/javascript"></script>
+</head>
+<body>
+  <script type="text/javascript">
+    vipDraw.pie(document.body, 600, 600, [{
+      fill: '#f90',
+      stroke: {
+        color: '#fff',
+        weight: '2.25pt'
+      },
+      data: {
+        text: 'JavaScript'
+      },
+      anim: true,
+      path: [300, 300, 200, 60, 30]
+    },{
+      fill: '#f00',
+      stroke: {
+        color: '#fff',
+        weight: '2.25pt'
+      },
+      data: {
+        text: 'Ruby'
+      },
+      anim: true,
+      path: [300, 300, 200, 98, 30+60]
+    },{
+      fill: '#0065ff',
+      stroke: {
+        color: '#fff',
+        weight: '2.25pt'
+      },
+      data: {
+        text: 'Java'
+      },
+      anim: true,
+      path: [300, 300, 200, 80, 30+60+98]
+    },{
+      fill: '#cf0',
+      stroke: {
+        color: '#fff',
+        weight: '2.25pt'
+      },
+      data: {
+        text: 'Python'
+      },
+      anim: true,
+      path: [300, 300, 200, 360-60-98-80, 30+60+98+80]
+    }]);
+
+  </script>
+</body>
+</html>
