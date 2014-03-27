@@ -47,70 +47,31 @@ window.vipDraw = (function(){
       },
       createArc: function($elem, opt){
         var $el = createNode('path');
-        var _time, _pathRs;
+        var _pathRs;
 
         _pathRs = method.arcPath.apply(null, opt.path);
 
         method.attr($el, {
           fill: opt.fill,
           stroke: opt.stroke ? opt.stroke.color : '#f00',
-          d: _pathRs.path + '',
+          d: _pathRs.path,
           'stroke-width': opt.stroke ? opt.stroke.weight : '3.0001388724496585',
           transform: 'matrix(1,0,0,1,0,0)'
         });
 
-
-        (function(){
-          if(opt&&opt.data){
-            var _deg = _pathRs.oDeg + _pathRs.deg/2;
-            var _r = _pathRs.r + 80;
-            var _left = _pathRs.x0 - _r;
-            var _top = _pathRs.y0 - _r;
-            var p3 = degGetPoint( _deg % 360, _r);
-            var x1, y1, x2, y2;
-
-            x1 = p3.x + _left;
-            y1 = p3.y + _top;
-            x2 = p3.x + _left + 1;
-            y2 = p3.y + _top;
-
-            method.createText($elem, {
-              x: x1,
-              y: y1,
-              text: opt.data.text,
-              stroke: {
-                color: opt.data.color || opt.fill,
-                weight: opt.data.weight || '12px'
-              },
-              path: 'm' + [x1, y1].join(',') + ' l' + [x2, y2].join(',')
-            });
-          }
-        })();
-
+        // anim
         if(opt.anim){
-          opt.anim = typeof opt.anim === 'number' ? opt.anim : 1.1;
-          $el.onmouseover = function(){
-            clearTimeout(_time);
-            _time = anim(1000, 1000 * opt.anim, function(i){
-              method.attr($el, {
-                transform: 'matrix(' + i/1000 + ',0,0,' + i/1000 + ',' + -(i/1000-1) * _pathRs.x0 + ',' + -(i/1000-1) * _pathRs.y0 + ')'
-              });
-            });
-          };
-          //$el.onmouseleave = function(){
-          $el.onmouseout = function(){
-            clearTimeout(_time);
-            _time = anim(1000 * opt.anim , 1000, function(i){
-              method.attr($el, {
-                transform: 'matrix(' + i/1000 + ',0,0,' + i/1000 + ',' + -(i/1000-1) * _pathRs.x0 + ',' + -(i/1000-1) * _pathRs.y0 + ')'
-              });
-            });
-          };
+          method.anim($el, _pathRs, opt);
+        }
+
+        // data
+        if(opt&&opt.data){
+          method.data($elem, _pathRs, opt);
         }
 
         $elem.appendChild($el);
       },
-      arcPath: function(x0, y0, r, deg, oDeg, $elem, opt){
+      arcPath: function(x0, y0, r, deg, oDeg){
         var left, top, right, bottom, p1, p2, x1, y1, x2, y2;
 
         left = x0 - r;
@@ -149,11 +110,70 @@ window.vipDraw = (function(){
         $el.appendChild($text);
         $elem.appendChild($el);
       },
+      data: function($elem, _pathRs, opt){
+        var _deg = _pathRs.oDeg + _pathRs.deg/2;
+        var _r = _pathRs.r + 80;
+        var _left = _pathRs.x0 - _r;
+        var _top = _pathRs.y0 - _r;
+        var p3 = degGetPoint( _deg % 360, _r);
+        var x1, y1, x2, y2;
+
+        x1 = p3.x + _left;
+        y1 = p3.y + _top;
+        x2 = p3.x + _left + 1;
+        y2 = p3.y + _top;
+
+        method.createText($elem, {
+          x: x1,
+          y: y1,
+          text: opt.data.text,
+          stroke: {
+            color: opt.data.color || opt.fill,
+            weight: opt.data.weight || '12px'
+          },
+          path: 'm' + [x1, y1].join(',') + ' l' + [x2, y2].join(',')
+        });
+      },
+      anim: function($el, _pathRs, opt){
+        var _time;
+        opt.anim = typeof opt.anim === 'number' ? opt.anim : 1.1;
+        $el.onmouseover = function(){
+          clearTimeout(_time);
+          _time = anim(1000, 1000 * opt.anim, function(i){
+            method.attr($el, {
+              transform: 'matrix(' + i/1000 + ',0,0,' + i/1000 + ',' + -(i/1000-1) * _pathRs.x0 + ',' + -(i/1000-1) * _pathRs.y0 + ')'
+            });
+          });
+        };
+
+        $el.onmouseout = function(){
+          clearTimeout(_time);
+          _time = anim(1000 * opt.anim , 1000, function(i){
+            method.attr($el, {
+              transform: 'matrix(' + i/1000 + ',0,0,' + i/1000 + ',' + -(i/1000-1) * _pathRs.x0 + ',' + -(i/1000-1) * _pathRs.y0 + ')'
+            });
+          });
+        };
+      },
       attr: function($elem, opt){
         for( o in opt){
           if (!opt.hasOwnProperty(o)) continue;
           $elem.setAttribute(o, opt[o]);
         }
+      },
+      ring: function($elem, ring){
+        var $el = createNode('path');
+        var _pathRs1, _pathRs2;
+
+        _pathRs1 = method.arcPath.apply(null, ring.concat([180, 0]));
+        _pathRs2 = method.arcPath.apply(null, ring.concat([180, 180]));
+
+        method.attr($el, {
+          fill: '#fff',
+          d: _pathRs1.path + _pathRs2.path,
+        });
+
+        $elem.appendChild($el);
       }
     };
   } else {
@@ -176,7 +196,7 @@ window.vipDraw = (function(){
       },
       createArc: function($elem, opt){
         var $el = createNode('shape');
-        var _time, _pathRs;
+        var _pathRs;
         $el.style.cssText = 'HEIGHT: 1px; WIDTH: 1px; POSITION: absolute; LEFT: 0px; FILTER: none; TOP: 0px';
         $el.coordsize = "1,1";
         if(opt.fill){
@@ -189,52 +209,12 @@ window.vipDraw = (function(){
         _pathRs = method.arcPath.apply(null, opt.path);
         $el.path = _pathRs.path;
 
-        (function(){
-          if(opt&&opt.data){
-            var _deg = _pathRs.oDeg + _pathRs.deg/2;
-            var _r = _pathRs.r + 80;
-            var _left = _pathRs.x0 - _r;
-            var _top = _pathRs.y0 - _r;
-            var p3 = degGetPoint( _deg % 360, _r);
-            var x1, y1, x2, y2;
+        if(opt&&opt.anim){
+          method.anim($el, opt);
+        }
 
-            x1 = p3.x + _left;
-            y1 = p3.y + _top;
-            x2 = p3.x + _left + 1;
-            y2 = p3.y + _top;
-
-            method.createText($elem, {
-              text: opt.data.text,
-              stroke: {
-                color: opt.data.color || opt.fill,
-                weight: opt.data.weight || '12px'
-              },
-              path: 'm' + [x1, y1].join(',') + ' l' + [x2, y2].join(',')
-            });
-          }
-        })();
-
-        if(opt.anim){
-          opt.anim = typeof opt.anim === 'number' ? opt.anim : 1.1;
-          $el.onmouseover = function(){
-            var _path = opt.path.slice(0);
-            var _r = _path[2];
-            clearTimeout(_time);
-            _time = anim(_r, parseInt(_r * opt.anim, 10), function(i){
-              _path[2] = i;
-              $el.path =  method.arcPath.apply(null, _path).path;
-            });
-          };
-          //$el.onmouseleave = function(){
-          $el.onmouseout = function(){
-            var _path = opt.path.slice(0);
-            var _r = _path[2];
-            clearTimeout(_time);
-            _time = anim(parseInt(_r * opt.anim, 10), _r, function(i){
-              _path[2] = i;
-              $el.path =  method.arcPath.apply(null, _path).path;
-            });
-          };
+        if(opt&&opt.data){
+          method.data($elem, _pathRs, opt);
         }
 
         $elem.appendChild($el);
@@ -283,6 +263,72 @@ window.vipDraw = (function(){
         $el.appendChild($path);
 
         $elem.appendChild($el);
+      },
+      data: function($elem, _pathRs, opt){
+        var _deg = _pathRs.oDeg + _pathRs.deg/2;
+        var _r = _pathRs.r + 80;
+        var _left = _pathRs.x0 - _r;
+        var _top = _pathRs.y0 - _r;
+        var p3 = degGetPoint( _deg % 360, _r);
+        var x1, y1, x2, y2;
+
+        x1 = p3.x + _left;
+        y1 = p3.y + _top;
+        x2 = p3.x + _left + 1;
+        y2 = p3.y + _top;
+
+        method.createText($elem, {
+          text: opt.data.text,
+          stroke: {
+            color: opt.data.color || opt.fill,
+            weight: opt.data.weight || '12px'
+          },
+          path: 'm' + [x1, y1].join(',') + ' l' + [x2, y2].join(',')
+        });
+      },
+      anim: function($el, opt){
+        var _time;
+        opt.anim = typeof opt.anim === 'number' ? opt.anim : 1.1;
+        $el.onmouseover = function(){
+          var _path = opt.path.slice(0);
+          var _r = _path[2];
+          clearTimeout(_time);
+          _time = anim(_r, parseInt(_r * opt.anim, 10), function(i){
+            _path[2] = i;
+            $el.path =  method.arcPath.apply(null, _path).path;
+          });
+        };
+        //$el.onmouseleave = function(){
+        $el.onmouseout = function(){
+          var _path = opt.path.slice(0);
+          var _r = _path[2];
+          clearTimeout(_time);
+          _time = anim(parseInt(_r * opt.anim, 10), _r, function(i){
+            _path[2] = i;
+            $el.path =  method.arcPath.apply(null, _path).path;
+          });
+        };
+      },
+      attr: function($elem, opt){
+        for( o in opt){
+          if (!opt.hasOwnProperty(o)) continue;
+          $elem.setAttribute(o, opt[o]);
+        }
+      },
+      ring: function($elem, ring){
+        var $el = createNode('shape');
+        var _pathRs1, _pathRs2;
+
+        _pathRs1 = method.arcPath.apply(null, ring.concat([180, 0]));
+        _pathRs2 = method.arcPath.apply(null, ring.concat([180, 180]));
+
+        $el.style.cssText = 'HEIGHT: 1px; WIDTH: 1px; POSITION: absolute; LEFT: 0px; FILTER: none; TOP: 0px';
+        $el.coordsize = "1,1";
+        $el.fillcolor = '#fff';
+        $el.strokecolor = '#fff';
+        $el.path = _pathRs1.path + _pathRs2.path;
+
+        $elem.appendChild($el);
       }
     };
   }
@@ -290,11 +336,16 @@ window.vipDraw = (function(){
   method.init(window);
 
   return {
-    pie: function($elem, width, height, opt){
+    pie: function($elem, width, height, opt, ring){
       var $paper = method.wrap($elem, width, height);
       for (var i = 0, l = opt.length; i < l ; i++){
         method.createArc($paper, opt[i]);
       }
+
+      if(ring){
+        method.ring($paper, ring);
+      }
+
     }
   };
 })();
