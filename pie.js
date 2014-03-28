@@ -1,4 +1,14 @@
-window.vipDraw = (function(){
+(function(plugin){
+
+  if(typeof define === "function" && define.cmd){
+    define(function(require, exports, module){
+      module.exports = plugin();
+    });
+  } else {
+    window.vipDraw = plugin();
+  }
+
+})(function(){
   var createNode, method;
 
   method = {};
@@ -74,21 +84,19 @@ window.vipDraw = (function(){
         r: r,
         deg: deg,
         oDeg: oDeg,
-        path: 'M' + [x0, y0].join(',') +  ' L' + [p1.x + left, p1.y + top].join(',') + ' A' + [r, r].join(',') + ',0,0,0,' + [p2.x + left, p2.y + top].join(',') + ' Z'
+        path: 'M' + [x0, y0].join(',') +  ' L' + [p1.x + left, p1.y + top].join(',') + ' A' + [r, r].join(',') + ',0,' + (deg>180 ? 1 : 0) + ',0,' + [p2.x + left, p2.y + top].join(',') + ' Z'
       };
     };
 
-    method.createArc = function($elem, opt){
+    method.createArc = function($elem, data, opt){
       var $el = createNode('path');
       var _pathRs;
 
-      _pathRs = method.arcPath.apply(null, opt.path);
+      _pathRs = method.arcPath.apply(null, data.path);
 
       method.attr($el, {
-        fill: opt.fill,
-        stroke: opt.stroke ? opt.stroke.color : '#f00',
+        fill: data.fill,
         d: _pathRs.path,
-        'stroke-width': opt.stroke ? opt.stroke.weight : '3.0001388724496585',
         transform: 'matrix(1,0,0,1,0,0)'
       });
 
@@ -98,8 +106,8 @@ window.vipDraw = (function(){
       }
 
       // data
-      if(opt&&opt.data){
-        method.data($elem, _pathRs, opt);
+      if(data.field){
+        method.data($elem, _pathRs, data);
       }
 
       $elem.appendChild($el);
@@ -123,13 +131,14 @@ window.vipDraw = (function(){
       $elem.appendChild($el);
     };
 
-    method.data = function($elem, _pathRs, opt){
+    method.data = function($elem, _pathRs, data){
       var _deg = _pathRs.oDeg + _pathRs.deg/2;
       var _r = _pathRs.r + 80;
       var _left = _pathRs.x0 - _r;
       var _top = _pathRs.y0 - _r;
       var p3 = method.degGetPoint( _deg % 360, _r);
       var x1, y1, x2, y2;
+      var field = data.field;
 
       x1 = p3.x + _left;
       y1 = p3.y + _top;
@@ -139,10 +148,10 @@ window.vipDraw = (function(){
       method.createText($elem, {
         x: x1,
         y: y1,
-        text: opt.data.text,
+        text: field.text,
         stroke: {
-          color: opt.data.color || opt.fill,
-          weight: opt.data.weight || '12px'
+          color: field.color || data.fill,
+          weight: field.weight || '12px'
         },
         path: 'm' + [x1, y1].join(',') + ' l' + [x2, y2].join(',')
       });
@@ -218,6 +227,15 @@ window.vipDraw = (function(){
       p1 = method.degGetPoint(oDeg, r);
       p2 = method.degGetPoint((oDeg+deg)%360, r);
 
+      left = parseInt(left, 10);
+      right = parseInt(right, 10);
+      top = parseInt(top, 10);
+      bottom = parseInt(bottom, 10);
+      p1.x = parseInt(p1.x, 10);
+      p1.y = parseInt(p1.y, 10);
+      p2.x = parseInt(p2.x, 10);
+      p2.y = parseInt(p2.y, 10);
+
       return {
         x0: x0,
         y0: y0,
@@ -228,27 +246,27 @@ window.vipDraw = (function(){
       };
     };
 
-    method.createArc = function($elem, opt){
+    method.createArc = function($elem, data, opt){
       var $el = createNode('shape');
       var _pathRs;
       $el.style.cssText = 'HEIGHT: 1px; WIDTH: 1px; POSITION: absolute; LEFT: 0px; FILTER: none; TOP: 0px';
       $el.coordsize = "1,1";
-      if(opt.fill){
-        $el.fillcolor = opt.fill;
+      if(data.fill){
+        $el.fillcolor = data.fill;
       }
-      if(opt.stroke){
-        opt.stroke.color ? $el.strokecolor = opt.stroke.color : '';
-        opt.stroke.weight ? $el.strokeweight = opt.stroke.weight : '';
-      }
-      _pathRs = method.arcPath.apply(null, opt.path);
+
+      $el.strokecolor = data.fill;
+      $el.strokeweight = '';
+
+      _pathRs = method.arcPath.apply(null, data.path);
       $el.path = _pathRs.path;
 
-      if(opt&&opt.anim){
-        method.anim($el, opt);
+      if(opt.anim){
+        method.anim($el, data, opt);
       }
 
-      if(opt&&opt.data){
-        method.data($elem, _pathRs, opt);
+      if(data.field){
+        method.data($elem, _pathRs, data);
       }
 
       $elem.appendChild($el);
@@ -278,13 +296,14 @@ window.vipDraw = (function(){
       $elem.appendChild($el);
     };
 
-    method.data = function($elem, _pathRs, opt){
+    method.data = function($elem, _pathRs, data){
       var _deg = _pathRs.oDeg + _pathRs.deg/2;
       var _r = _pathRs.r + 80;
       var _left = _pathRs.x0 - _r;
       var _top = _pathRs.y0 - _r;
       var p3 = method.degGetPoint( _deg % 360, _r);
       var x1, y1, x2, y2;
+      var field = data.field;
 
       x1 = p3.x + _left;
       y1 = p3.y + _top;
@@ -292,20 +311,20 @@ window.vipDraw = (function(){
       y2 = p3.y + _top;
 
       method.createText($elem, {
-        text: opt.data.text,
+        text: field.text,
         stroke: {
-          color: opt.data.color || opt.fill,
-          weight: opt.data.weight || '12px'
+          color: field.color || data.fill,
+          weight: field.weight || '12px'
         },
         path: 'm' + [x1, y1].join(',') + ' l' + [x2, y2].join(',')
       });
     };
 
-    method.anim = function($el, opt){
+    method.anim = function($el, data, opt){
       var _time;
       opt.anim = typeof opt.anim === 'number' ? opt.anim : 1.1;
       $el.onmouseover = function(){
-        var _path = opt.path.slice(0);
+        var _path = data.path.slice(0);
         var _r = _path[2];
         clearTimeout(_time);
         _time = method.animate(_r, parseInt(_r * opt.anim, 10), function(i){
@@ -314,7 +333,7 @@ window.vipDraw = (function(){
         });
       };
       $el.onmouseout = function(){
-        var _path = opt.path.slice(0);
+        var _path = data.path.slice(0);
         var _r = _path[2];
         clearTimeout(_time);
         _time = method.animate(parseInt(_r * opt.anim, 10), _r, function(i){
@@ -338,6 +357,7 @@ window.vipDraw = (function(){
       $el.fillcolor = fill;
       $el.strokecolor = fill;
       $el.path = _pathRs1.path + _pathRs2.path;
+      //$el.path = _pathRs1.path;
 
       $elem.appendChild($el);
     };
@@ -347,16 +367,18 @@ window.vipDraw = (function(){
   method.init(window);
 
   return {
-    pie: function($elem, width, height, opt, ring){
-      var $paper = method.wrap($elem, width, height);
-      for (var i = 0, l = opt.length; i < l ; i++){
-        method.createArc($paper, opt[i]);
+    //pie: function($elem, width, height, opt, ring){
+    pie: function($elem, opt){
+      var $paper = method.wrap($elem, opt.width, opt.height);
+      var data = opt.data;
+      for (var i = 0, l = data.length; i < l ; i++){
+        method.createArc($paper, data[i], opt);
       }
 
-      if(ring){
-        method.ring($paper, ring);
+      if(opt.ring){
+        method.ring($paper, opt.ring);
       }
 
     }
   };
-})();
+});
