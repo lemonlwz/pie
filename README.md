@@ -25,49 +25,64 @@
 
 ###例子
 ```js
-    vipDraw.pie(document.body, 600, 600, [{  
-      fill: '#f90',  
-      stroke: {  
-        color: '#fff',  
-        weight: '2.25pt'  
-      },  
-      data: {  
-        text: 'JavaScript'  
-      },  
+    vipDraw.pie(document.body, {  
+      width: 600,  
+      height: 600,  
+      data: [{  
+        fill: '#f90',  
+        path: [300, 300, 200, 60, 30],  
+        field: {  
+          stroke: {  
+            color: '#fff',  
+            weight: '2.25pt'  
+          },  
+          text: 'JavaScript'  
+        }  
+      },{  
+        fill: '#f90',  
+        path: [300, 300, 200, 60, 30],  
+        field: {  
+          stroke: {  
+            color: '#fff',  
+            weight: '2.25pt'  
+          },  
+          text: 'JavaScript'  
+        }  
+      },{  
+        fill: '#f00',  
+        path: [300, 300, 200, 98, 30+60],  
+        field: {  
+          stroke: {  
+            color: '#fff',  
+            weight: '2.25pt'  
+          },  
+          text: 'Ruby'  
+        }  
+      },{  
+        fill: '#0065ff',  
+        path: [300, 300, 200, 80, 30+60+98],  
+        field: {  
+          stroke: {  
+            color: '#fff',  
+            weight: '2.25pt'  
+          },  
+          text: 'Java'  
+        }  
+      },{  
+        fill: '#cf0',  
+        path: [300, 300, 200, 360-60-98-80, 30+60+98+80],  
+        field: {  
+          stroke: {  
+            color: '#fff',  
+            weight: '2.25pt'  
+          },  
+          text: 'Python'  
+        }  
+      }],  
       anim: true,  
-      path: [300, 300, 200, 60, 30]  
-    },{  
-      fill: '#f00',  
-      stroke: {  
-        color: '#fff',  
-        weight: '2.25pt'  
-      },  
-      data: {  
-        text: 'Ruby'  
-      },  
-      anim: true,  
-      path: [300, 300, 200, 98, 30+60]  
-    },{  
-      fill: '#0065ff',  
-      stroke: {  
-        color: '#fff',  
-        weight: '2.25pt'  
-      },  
-      data: {  
-        text: 'Java'  
-      },  
-      anim: true,  
-      path: [300, 300, 200, 80, 30+60+98]  
-    },{  
-      fill: '#cf0',  
-      stroke: {  
-        color: '#fff',  
-        weight: '2.25pt'  
-      },  
-      data: {  
-        text: 'Python'  
-      },  
-      anim: true,  
-      path: [300, 300, 200, 360-60-98-80, 30+60+98+80]  
-    }]);
+      ring: {  
+        fill: '#fff',  
+        path: [300, 300, 150]  
+      }  
+    });  
 ```
